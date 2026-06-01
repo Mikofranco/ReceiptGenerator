@@ -8,6 +8,7 @@ import com.example.demo.dto.requests.AuthRequest;
 import com.example.demo.dto.response.AuthResponse;
 import com.example.demo.dto.response.ProfileResponse;
 import com.example.demo.dto.response.RefreshTokenResponse;
+import com.example.demo.service.MailService;
 import com.example.demo.service.jwt.JwtService;
 import jakarta.annotation.Nonnull;
 import jakarta.transaction.Transactional;
@@ -31,10 +32,10 @@ public class AuthImpl implements UserService {
     private final ProfileRepo  profileRepo;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final MailService mailService;
 
     @Override @Transactional
     public ProfileResponse register(User userRequest) {
-
         // 1. Check if username already exists
         if (userRepo.findByUsername(userRequest.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists: " + userRequest.getUsername());
