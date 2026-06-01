@@ -7,6 +7,7 @@ import com.example.demo.data.repo.UserRepo;
 import com.example.demo.dto.requests.AuthRequest;
 import com.example.demo.dto.response.AuthResponse;
 import com.example.demo.dto.response.ProfileResponse;
+import com.example.demo.dto.response.RefreshTokenResponse;
 import com.example.demo.service.jwt.JwtService;
 import jakarta.annotation.Nonnull;
 import jakarta.transaction.Transactional;
@@ -103,6 +104,11 @@ public class AuthImpl implements UserService {
         authResponse.setUserId(user.getId());
         authResponse.setUserName(user.getUsername());
         return authResponse;
+    }
+
+    @Override
+    public RefreshTokenResponse refresh(String token) {
+        return null;
     }
 
 }

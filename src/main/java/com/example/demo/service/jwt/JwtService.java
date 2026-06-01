@@ -15,13 +15,22 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    private static final String SECRET = "your-very-secure-512-bit-or-longer-secret-key-base64-encoded";
+    private static final String SECRET = "Vhi8PLXRXz0rkWzjPK4/3kTiTnvfT36GwIw61Nttl1c=";
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
+                .signWith(getSignKey())
+                .compact();
+    }
+
+    public String createAccessToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24)) // 24h
                 .signWith(getSignKey())
                 .compact();
     }
