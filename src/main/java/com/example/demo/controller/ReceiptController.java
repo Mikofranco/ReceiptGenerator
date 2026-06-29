@@ -31,6 +31,7 @@ public class ReceiptController {
         GenerateReceiptResponse response =receiptService.generateReceiptByUserId(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @GetMapping("/test")
     public ResponseEntity<String> testEndpoint() {
         return ResponseEntity.ok("Receipt Controller is working! ✅");
