@@ -8,8 +8,10 @@ import com.example.demo.dto.requests.UpdateReceiptRequest;
 import com.example.demo.dto.response.GenerateReceiptResponse;
 import com.example.demo.dto.response.PaginatedResponse;
 import com.example.demo.dto.response.ReceiptDeletedResponse;
+import com.example.demo.dto.response.ReceiptResponse;
 import com.example.demo.service.Auth.UserService;
 import com.example.demo.utils.Functions;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,7 @@ public class ReceiptImpl implements ReceiptService {
     private final ReceiptRepo receiptRepo;
     private final UserService userService;
     @Override
-    public Receipt generateReceipt(Receipt receipt) {
+    public ReceiptResponse generateReceipt(Receipt receipt) {
         Receipt generatedReceipt = new Receipt();
         generatedReceipt.setDescription(receipt.getDescription());
         generatedReceipt.setCustomerName(receipt.getCustomerName());
@@ -33,13 +35,35 @@ public class ReceiptImpl implements ReceiptService {
         generatedReceipt.setCreatedAt(LocalDateTime.now());
         generatedReceipt.setTotalAmount(Functions
                 .validateTotalAmount(receipt.getTotalAmount(), receipt.getDiscount()));
-        return  receiptRepo.save(generatedReceipt);
+        var savedReceipt = receiptRepo.save(generatedReceipt);
+
+        return mapReceiptResponse(savedReceipt);
+    }
+
+    @Nonnull
+    private ReceiptResponse mapReceiptResponse(Receipt savedReceipt) {
+        ReceiptResponse response = new ReceiptResponse();
+        response.setId(savedReceipt.getId());
+        response.setCreatedAt(savedReceipt.getCreatedAt());
+        response.setDescription(savedReceipt.getDescription());
+        response.setCustomerName(savedReceipt.getCustomerName());
+        response.setReceiptFormats(savedReceipt.getReceiptFormats());
+        response.setTotalAmount(savedReceipt.getTotalAmount());
+        response.setDiscount(savedReceipt.getDiscount());
+        response.setTotalAmount(savedReceipt.getTotalAmount());
+
+        if (savedReceipt.getCreatedBy() != null) {
+            response.setCreatedBy(savedReceipt.getCreatedBy().getId()); // or getName()
+        }
+        return response;
     }
 
     @Override
-    public Receipt findById(String id) {
-        return receiptRepo.findById(id)
+    public ReceiptResponse findById(String id) {
+        Receipt foundReceipt= receiptRepo.findById(id)
                 .orElseThrow(()-> new RuntimeException("Receipt not Found"));
+
+        return mapReceiptResponse(foundReceipt);
     }
 
     @Override
@@ -67,7 +91,7 @@ public class ReceiptImpl implements ReceiptService {
 
     @Override
     public Receipt updateReceipt(UpdateReceiptRequest request, String id) {
-       Receipt initialReceipt =  findById(id);
+       Receipt initialReceipt =  receiptRepo.findById(id).orElseThrow(()-> new RuntimeException("Receipt Not Found"));
        if(request.getDescription() != null && !request.getDescription().isEmpty()){
            initialReceipt.setDescription(request.getDescription());
        }
@@ -98,10 +122,12 @@ public class ReceiptImpl implements ReceiptService {
     }
 
     @Override
-    public List<Receipt> getReceiptsByUserId(String userId) {
-       return receiptRepo.findAll().stream()
-               .filter((receipt)-> receipt.getCreatedBy().getId().contentEquals(userId)).toList();
+    public List<ReceiptResponse> getReceiptsByUserId(String userId) {
 
+        return receiptRepo.findByCreatedBy_Id(userId)
+                .stream()
+                .map(this::mapReceiptResponse)
+                .toList();
     }
 
     @Override

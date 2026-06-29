@@ -6,18 +6,19 @@ import com.example.demo.dto.requests.UpdateReceiptRequest;
 import com.example.demo.dto.response.GenerateReceiptResponse;
 import com.example.demo.dto.response.PaginatedResponse;
 import com.example.demo.dto.response.ReceiptDeletedResponse;
+import com.example.demo.dto.response.ReceiptResponse;
 
 import java.util.List;
 
 public interface ReceiptService {
-    Receipt generateReceipt(Receipt receipt);
-    Receipt findById(String id);
+    ReceiptResponse generateReceipt(Receipt receipt);
+    ReceiptResponse findById(String id);
     List<Receipt> findByCustomerName(String customerName);
     ReceiptDeletedResponse deleteReceipt(String id);
     List<Receipt> getAllReceipts();
     Receipt updateReceipt(UpdateReceiptRequest request, String id);
     PaginatedResponse<Receipt> getPaginatedReceipts(int page, int pageSize);
-    List<Receipt> getReceiptsByUserId(String userId);
+    List<ReceiptResponse> getReceiptsByUserId(String userId);
     GenerateReceiptResponse generateReceiptByUserId(GenerateReceiptRequest request);
 
 }

@@ -6,6 +6,7 @@ import com.example.demo.dto.requests.UpdateReceiptRequest;
 import com.example.demo.dto.response.GenerateReceiptResponse;
 import com.example.demo.dto.response.PaginatedResponse;
 import com.example.demo.dto.response.ReceiptDeletedResponse;
+import com.example.demo.dto.response.ReceiptResponse;
 import com.example.demo.service.receipt.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,8 +22,8 @@ public class ReceiptController {
     private final ReceiptService receiptService;
 
     @PostMapping("/generate")
-    public ResponseEntity<Receipt> createReceipt(@RequestBody Receipt receipt) {
-        Receipt response =receiptService.generateReceipt(receipt);
+    public ResponseEntity<ReceiptResponse> createReceipt(@RequestBody Receipt receipt) {
+        ReceiptResponse response =receiptService.generateReceipt(receipt);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -64,7 +65,7 @@ public class ReceiptController {
         return ResponseEntity.ok(receiptService.getPaginatedReceipts(page, size));
     }
     @GetMapping("/{userId}")
-    public ResponseEntity<List<Receipt>> getReceiptByUserId(@PathVariable String userId) {
+    public ResponseEntity<List<ReceiptResponse>> getReceiptByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(receiptService.getReceiptsByUserId(userId));
     }
 }
