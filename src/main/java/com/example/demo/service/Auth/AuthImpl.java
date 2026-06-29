@@ -112,4 +112,9 @@ public class AuthImpl implements UserService {
         return null;
     }
 
+    @Override
+    public User findById(String id) {
+        return userRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException(id));
+    }
+
 }

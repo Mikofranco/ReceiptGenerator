@@ -1,35 +1,25 @@
-package com.example.demo.data.model;
+package com.example.demo.dto.response;
 
+import com.example.demo.data.model.ReceiptFormats;
+import com.example.demo.data.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-@Getter
-@Setter
-@RequiredArgsConstructor
-@Entity
-public class Receipt {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+@Setter @Getter
+public class GenerateReceiptResponse {
     private String id;
     private String description;
     private String customerName;
-    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
-    @CreatedDate
     private LocalDateTime createdAt;
-    @LastModifiedDate
     private LocalDateTime updatedAt;
     private float discount;
-    @Enumerated(EnumType.STRING)
     private ReceiptFormats receiptFormats;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = true)
-    private User createdBy;
+    private String createdBy;
+    private String updatedBy;
 }

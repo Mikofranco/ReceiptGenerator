@@ -1,25 +1,28 @@
 package com.example.demo.service.receipt;
 
 import com.example.demo.data.model.Receipt;
+import com.example.demo.data.model.User;
 import com.example.demo.data.repo.ReceiptRepo;
+import com.example.demo.dto.requests.GenerateReceiptRequest;
 import com.example.demo.dto.requests.UpdateReceiptRequest;
+import com.example.demo.dto.response.GenerateReceiptResponse;
 import com.example.demo.dto.response.PaginatedResponse;
 import com.example.demo.dto.response.ReceiptDeletedResponse;
+import com.example.demo.service.Auth.UserService;
 import com.example.demo.utils.Functions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReceiptImpl implements ReceiptService {
     private final ReceiptRepo receiptRepo;
+    private final UserService userService;
     @Override
     public Receipt generateReceipt(Receipt receipt) {
         Receipt generatedReceipt = new Receipt();
@@ -91,6 +94,39 @@ public class ReceiptImpl implements ReceiptService {
         response.setCurrentPage(page);
         response.setTotalCount(totalCount);
         response.setTotalPage(totalCount / pageSize);
+        return response;
+    }
+
+    @Override
+    public List<Receipt> getReceiptsByUserId(String userId) {
+       return receiptRepo.findAll().stream()
+               .filter((receipt)-> receipt.getCreatedBy().getId().contentEquals(userId)).toList();
+
+    }
+
+    @Override
+    public GenerateReceiptResponse generateReceiptByUserId(GenerateReceiptRequest request) {
+       User foundUser =  userService.findById(request.getUserId());
+
+        Receipt generatedReceipt = new Receipt();
+        generatedReceipt.setCreatedBy(foundUser);
+        generatedReceipt.setDescription(request.getDescription());
+        generatedReceipt.setCustomerName(request.getCustomerName());
+        generatedReceipt.setReceiptFormats(request.getReceiptFormats());
+        generatedReceipt.setDiscount(request.getDiscount());
+        generatedReceipt.setCreatedAt(LocalDateTime.now());
+        generatedReceipt.setTotalAmount(Functions
+                .validateTotalAmount(request.getTotalAmount(), request.getDiscount()));
+        var savedReceipt =  receiptRepo.save(generatedReceipt);
+
+        GenerateReceiptResponse response = new GenerateReceiptResponse();
+        response.setId(savedReceipt.getId());
+        response.setCreatedAt(savedReceipt.getCreatedAt());
+        response.setDescription(savedReceipt.getDescription());
+        response.setCustomerName(savedReceipt.getCustomerName());
+        response.setTotalAmount(savedReceipt.getTotalAmount());
+        response.setUpdatedAt(savedReceipt.getUpdatedAt());
+        response.setCreatedBy(savedReceipt.getCreatedBy().getId());
         return response;
     }
 

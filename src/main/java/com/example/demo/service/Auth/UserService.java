@@ -14,5 +14,6 @@ public interface UserService {
     List<User> getUsers();
     AuthResponse login(AuthRequest request);
     RefreshTokenResponse refresh(String token);
+    User findById(String id);
 
 }
