@@ -90,7 +90,7 @@ public class ReceiptImpl implements ReceiptService {
     }
 
     @Override
-    public Receipt updateReceipt(UpdateReceiptRequest request, String id) {
+    public ReceiptResponse updateReceipt(UpdateReceiptRequest request, String id) {
        Receipt initialReceipt =  receiptRepo.findById(id).orElseThrow(()-> new RuntimeException("Receipt Not Found"));
        if(request.getDescription() != null && !request.getDescription().isEmpty()){
            initialReceipt.setDescription(request.getDescription());
@@ -105,7 +105,8 @@ public class ReceiptImpl implements ReceiptService {
            initialReceipt.setTotalAmount(request.getTotalAmount());
        }
        initialReceipt.setUpdatedAt(LocalDateTime.now());
-        return receiptRepo.save(initialReceipt);
+       Receipt readyToMapReceipt = receiptRepo.save(initialReceipt);
+       return mapReceiptResponse(readyToMapReceipt);
     }
 
     @Override
@@ -132,7 +133,7 @@ public class ReceiptImpl implements ReceiptService {
 
     @Override
     public GenerateReceiptResponse generateReceiptByUserId(GenerateReceiptRequest request) {
-       User foundUser =  userService.findById(request.getUserId());
+       User foundUser =  userService.findUserById(request.getUserId());
 
         Receipt generatedReceipt = new Receipt();
         generatedReceipt.setCreatedBy(foundUser);

@@ -18,8 +18,8 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> getProfileById(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfileById(id));
     }
-    @PatchMapping("")
-    public ResponseEntity<ProfileResponse> updateProfile(@RequestBody Profile profile, String id){
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProfileResponse> updateProfile(@RequestBody Profile profile,@PathVariable String id){
         return ResponseEntity.status(HttpStatus.OK).body(profileService.updateProfile(profile, id));
     }
 

@@ -5,6 +5,7 @@ import com.example.demo.dto.requests.AuthRequest;
 import com.example.demo.dto.response.AuthResponse;
 import com.example.demo.dto.response.ProfileResponse;
 import com.example.demo.dto.response.RefreshTokenResponse;
+import com.example.demo.dto.response.UserResponse;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public interface UserService {
     List<User> getUsers();
     AuthResponse login(AuthRequest request);
     RefreshTokenResponse refresh(String token);
-    User findById(String id);
+    UserResponse findById(String id);
+    User findUserById(String id);
 
 }

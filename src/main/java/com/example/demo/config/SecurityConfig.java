@@ -3,6 +3,7 @@ package com.example.demo.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -93,7 +94,35 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
+                                .authenticationEntryPoint((request, response, authException) -> {
+                                    response.setContentType("application/json");
+                                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                    response.getWriter().write("""
+                                {
+                                  "success": false,
+                                  "error": "Unauthorized",
+                                  "message": "Please login to continue",
+                                  "timestamp": "%s"
+                                }
+                                """.formatted(java.time.LocalDateTime.now()));
+                                })
+
+                                // When user is logged in but doesn't have permission
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    response.setContentType("application/json");
+                                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                                    response.getWriter().write("""
+                                {
+                                  "success": false,
+                                  "error": "Forbidden",
+                                  "message": "You don't have permission to access this resource",
+                                  "timestamp": "%s"
+                                }
+                                """.formatted(java.time.LocalDateTime.now()));
+                                })
+                        );
 
         return http.build();
     }

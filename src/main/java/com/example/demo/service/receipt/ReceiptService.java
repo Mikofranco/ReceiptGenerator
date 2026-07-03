@@ -16,7 +16,7 @@ public interface ReceiptService {
     List<Receipt> findByCustomerName(String customerName);
     ReceiptDeletedResponse deleteReceipt(String id);
     List<Receipt> getAllReceipts();
-    Receipt updateReceipt(UpdateReceiptRequest request, String id);
+    ReceiptResponse updateReceipt(UpdateReceiptRequest request, String id);
     PaginatedResponse<Receipt> getPaginatedReceipts(int page, int pageSize);
     List<ReceiptResponse> getReceiptsByUserId(String userId);
     GenerateReceiptResponse generateReceiptByUserId(GenerateReceiptRequest request);

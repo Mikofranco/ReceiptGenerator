@@ -1,17 +1,28 @@
 package com.example.demo.service.profile;
 
 import com.example.demo.data.model.Profile;
+import com.example.demo.data.model.User;
 import com.example.demo.data.repo.ProfileRepo;
+import com.example.demo.dto.response.BusinessInfoResponse;
 import com.example.demo.dto.response.ProfileResponse;
+import com.example.demo.dto.response.UserResponse;
+import com.example.demo.service.Auth.UserService;
+import com.example.demo.service.businessInfo.BusinessInfoService;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+
+import static com.example.demo.service.Auth.AuthImpl.mapProfileResponse;
+import static com.example.demo.service.Auth.AuthImpl.mapUserResponse;
+
 @Service
 @RequiredArgsConstructor
 public class ProfileImpl implements ProfileService {
     private final ProfileRepo profileRepo;
+    private final BusinessInfoService businessInfoService;
 
     @Override
     public ProfileResponse updateProfile(Profile profile, String id) {
@@ -37,17 +48,21 @@ public class ProfileImpl implements ProfileService {
        if(savedProfile.getId()!=null){
            throw new RuntimeException("Profile not updated");
        }
-        return new ProfileResponse( savedProfile.getUser().getId(),
-                savedProfile.getUser().getUsername(), "Profile Updated", savedProfile);
+       BusinessInfoResponse businessInfoResponse = businessInfoService.
+               findBusinessInfoById(savedProfile.getUser().getId());
+
+
+        return mapProfileResponse(savedProfile.getUser(), foundProfile);
+
     }
 
     @Override
     public ProfileResponse getProfileById(String id) {
-        Profile foundProfile =profileRepo.findById(id).orElseThrow(()-> new RuntimeException("Profile not found"));
-        System.out.println("==============================" + foundProfile.toString());
-        return new ProfileResponse( foundProfile.getUser().getId(),
-                foundProfile.getUser().getUsername(), "Profile Updated", foundProfile);
+        Profile foundProfile =profileRepo.findByUserId(id)
+                .orElseThrow(()-> new RuntimeException("Profile not found"));
+        return mapProfileResponse(foundProfile.getUser(), foundProfile);
     }
+
 
     @Override
     public ProfileResponse getProfileByUsername(String username) {

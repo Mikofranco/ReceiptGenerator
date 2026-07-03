@@ -1,13 +1,12 @@
 package com.example.demo.service.Auth;
 
+import com.example.demo.data.model.BusinessInfo;
 import com.example.demo.data.model.Profile;
 import com.example.demo.data.model.User;
 import com.example.demo.data.repo.ProfileRepo;
 import com.example.demo.data.repo.UserRepo;
 import com.example.demo.dto.requests.AuthRequest;
-import com.example.demo.dto.response.AuthResponse;
-import com.example.demo.dto.response.ProfileResponse;
-import com.example.demo.dto.response.RefreshTokenResponse;
+import com.example.demo.dto.response.*;
 import com.example.demo.service.MailService;
 import com.example.demo.service.jwt.JwtService;
 import jakarta.annotation.Nonnull;
@@ -15,13 +14,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.example.demo.service.businessInfo.BusinessInfoImpl.mapBusinessInfoResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -45,18 +45,47 @@ public class AuthImpl implements UserService {
         User newUser = new User();
         newUser.setUsername(userRequest.getUsername());
         newUser.setPassword(bCryptPasswordEncoder.encode(userRequest.getPassword()));
+        newUser.setFirstname(userRequest.getFirstname());
+        newUser.setLastname(userRequest.getLastname());
 
         User savedUser = userRepo.save(newUser);
 
         // 3. Create Profile using the SAVED user (with generated ID)
         Profile savedProfile = createProfile(savedUser);
 
-        return new ProfileResponse(
-                savedUser.getId(),
-                savedUser.getUsername(),
-                "Registered Successfully",
-                savedProfile
-        );
+        return mapProfileResponse(savedUser, savedProfile);
+    }
+
+    @Nonnull
+    public static ProfileResponse mapProfileResponse(User savedUser, Profile savedProfile) {
+        ProfileResponse response = new ProfileResponse();
+        response.setProfile(mapProfileToUserdata(savedProfile));
+        response.setUsername(savedUser.getUsername());
+        response.setUserId(savedUser.getId());
+        response.setMessage("Register successfully");
+        response.setUserResponse(mapUserResponse(savedUser));
+        return response;
+    }
+
+    @Nonnull
+    public static UserProfile mapProfileToUserdata(Profile savedProfile) {
+
+        return new UserProfile(savedProfile.getId(),  savedProfile.getFirstName(),
+                savedProfile.getLastName(),savedProfile.getEmail(), savedProfile.getAddress(),
+                savedProfile.getCity(), savedProfile.getState(), savedProfile.getCountry(), savedProfile.getProfileType(), savedProfile.getAvatarUrl());
+    }
+
+
+    @Nonnull
+    public static ProfileResponse mapProfileResponse(User savedUser, Profile savedProfile, BusinessInfo savedBusinessInfo) {
+        ProfileResponse response = new ProfileResponse();
+        response.setProfile(mapProfileToUserdata(savedProfile));
+        response.setUsername(savedUser.getUsername());
+        response.setUserId(savedUser.getId());
+        response.setMessage("Register successfully");
+        response.setUserResponse(mapUserResponse(savedUser));
+        response.setBusinessInfoResponse(mapBusinessInfoResponse(savedBusinessInfo));
+        return response;
     }
 
     @Nonnull
@@ -64,7 +93,9 @@ public class AuthImpl implements UserService {
 
         Profile newProfile = new Profile();
 
-        newProfile.setUser(savedUser);           // Important: Link to already saved User
+        newProfile.setUser(savedUser);
+        newProfile.setFirstName(savedUser.getFirstname());// Important: Link to already saved User
+        newProfile.setLastName(savedUser.getLastname());
         newProfile.setEmail(savedUser.getUsername());   // or savedUser.getEmail() if you have it
 
         // Do NOT manually set Profile ID unless it's a natural key
@@ -103,6 +134,8 @@ public class AuthImpl implements UserService {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setToken(token);
         authResponse.setUserId(user.getId());
+        authResponse.setFirstName(user.getFirstname());
+        authResponse.setLastName(user.getLastname());
         authResponse.setUserName(user.getUsername());
         return authResponse;
     }
@@ -113,8 +146,24 @@ public class AuthImpl implements UserService {
     }
 
     @Override
-    public User findById(String id) {
+    public UserResponse findById(String id) {
+        User foundUser= userRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException(id));
+        return mapUserResponse(foundUser);
+    }
+
+    @Override
+    public User findUserById(String id) {
         return userRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException(id));
+    }
+
+    @Nonnull
+    public static UserResponse mapUserResponse(User foundUser) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(foundUser.getId());
+        userResponse.setUsername(foundUser.getUsername());
+        userResponse.setFirstname(foundUser.getFirstname());
+        userResponse.setLastname(foundUser.getLastname());
+        return userResponse;
     }
 
 }

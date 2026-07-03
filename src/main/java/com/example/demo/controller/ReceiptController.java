@@ -29,6 +29,7 @@ public class ReceiptController {
 
     @PostMapping("/generateById")
     public ResponseEntity<GenerateReceiptResponse> createReceiptByUserId(@RequestBody GenerateReceiptRequest request) {
+        System.out.println("in the controller ");
         GenerateReceiptResponse response =receiptService.generateReceiptByUserId(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -57,7 +58,7 @@ public class ReceiptController {
         return ResponseEntity.ok(receiptService.deleteReceipt(id));
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<Receipt> updateReceipt(@RequestBody UpdateReceiptRequest request,@PathVariable String id) {
+    public ResponseEntity<ReceiptResponse> updateReceipt(@RequestBody UpdateReceiptRequest request,@PathVariable String id) {
         return ResponseEntity.ok(receiptService.updateReceipt(request,id));
     }
     @GetMapping
