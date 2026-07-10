@@ -27,6 +27,7 @@ public class ReceiptController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
     @PostMapping("/generateById")
     public ResponseEntity<GenerateReceiptResponse> createReceiptByUserId(@RequestBody GenerateReceiptRequest request) {
         System.out.println("in the controller ");
